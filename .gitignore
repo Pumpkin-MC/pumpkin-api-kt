@@ -22,6 +22,11 @@
 .idea/**/dbnavigator.xml
 
 /build/
+/api/build/
+/api/tools/
+/gradle-plugin/build/
+/example/build/
+/example/.gradle/
 
 .idea
 .kotlin

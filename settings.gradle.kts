@@ -1,4 +1,4 @@
-rootProject.name = "pumpkin-plugin-template-kt"
+rootProject.name = "pumpkin-api-kt"
 
 pluginManagement {
     resolutionStrategy {
@@ -7,3 +7,6 @@ pluginManagement {
         }
     }
 }
+
+include("api")
+include("gradle-plugin")

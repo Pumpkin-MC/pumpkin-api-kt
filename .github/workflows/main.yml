@@ -1,6 +1,7 @@
 name: Main
 on:
   push:
+    branches: [master]
   pull_request:
   workflow_dispatch:
   workflow_run:
@@ -10,12 +11,16 @@ on:
       - "Update WIT"
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   main:
     name: Build, test, and release
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,21 +28,45 @@ jobs:
         with:
           submodules: true
 
+      - name: Set temporary build paths
+        run: |
+          echo "PUMPKIN_CI_REPOSITORY=$RUNNER_TEMP/pumpkin-maven" >> "$GITHUB_ENV"
+
+      - name: Read pinned tool versions
+        id: tools
+        run: |
+          while IFS='=' read -r name version; do
+            echo "$name=$version" >> "$GITHUB_OUTPUT"
+          done < gradle/tool-versions.properties
+
       - name: Set up Java/Kotlin
         uses: actions/setup-java@v6
         with:
-          distribution: liberica
+          distribution: temurin
           java-version: "25"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
+        with:
+          # PRs reuse the default-branch cache without updating it.
+          cache-read-only: ${{ github.ref != format('refs/heads/{0}', github.event.repository.default_branch) }}
 
-      - name: Cache Tools
+      - name: Cache binding generator
         uses: actions/cache@v6
         with:
-          path: tools
-          key: ${{ runner.os }}-${{ runner.arch }}-tools
+          path: api/tools/wit-bindgen/${{ steps.tools.outputs.witBindgenRevision }}
+          key: ${{ runner.os }}-${{ runner.arch }}-wit-bindgen-${{ steps.tools.outputs.witBindgenRevision }}
 
-      - name: Build example plugin to test
+      - name: Cache consumer tools
+        uses: actions/cache@v6
+        with:
+          path: example/build/tools/wasm-tools/${{ steps.tools.outputs.wasmToolsVersion }}
+          key: ${{ runner.os }}-${{ runner.arch }}-wasm-tools-${{ steps.tools.outputs.wasmToolsVersion }}
+
+      - name: Build and publish development packages
         run: |
-          ./gradlew build --no-daemon
+          ./gradlew :api:build :gradle-plugin:build :api:publishToMavenLocal :gradle-plugin:publishToMavenLocal \
+            -Dmaven.repo.local="$PUMPKIN_CI_REPOSITORY" --build-cache --no-daemon
+
+      - name: Build and validate example component
+        run: ./example/gradlew -p example build --build-cache --no-daemon
