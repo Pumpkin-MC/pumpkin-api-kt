@@ -102,7 +102,7 @@ jobs:
 
           cp api/build/libs/pumpkin-api-kt-wasm-wasi-*.klib artifacts/pumpkin-api-kt-wasm-wasi-${ARTIFACT_ID}.klib
           cp api/build/libs/pumpkin-api-kt-wasm-wasi-*-sources.jar artifacts/pumpkin-api-kt-wasm-wasi-${ARTIFACT_ID}-sources.jar
-          cp gradle-plugin/build/libs/pumpkin-api-kt-gradle-plugin-*.jar artifacts/pumpkin-api-kt-grade-plugin-${ARTIFACT_ID}.jar
+          cp gradle-plugin/build/libs/pumpkin-api-kt-gradle-plugin-*.jar artifacts/pumpkin-api-kt-gradle-plugin-${ARTIFACT_ID}.jar
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
