@@ -11,7 +11,8 @@ on:
       - "Update WIT"
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -63,6 +64,13 @@ jobs:
           path: example/build/tools/wasm-tools/${{ steps.tools.outputs.wasmToolsVersion }}
           key: ${{ runner.os }}-${{ runner.arch }}-wasm-tools-${{ steps.tools.outputs.wasmToolsVersion }}
 
+      - name: Clear old cached build artifacts
+        run: |
+          set -eux
+
+          rm -f api/build/libs/*
+          rm -f gradle-plugin/build/libs/*
+
       - name: Build and publish development packages
         run: |
           ./gradlew :api:build :gradle-plugin:build :api:publishToMavenLocal :gradle-plugin:publishToMavenLocal \
@@ -70,3 +78,47 @@ jobs:
 
       - name: Build and validate example component
         run: ./example/gradlew -p example build --build-cache --no-daemon
+
+      - name: Set GITHUB_RELEASE_TAG & ARTIFACT_ID
+        run: |
+          set -eux
+          if [[ '${{ github.ref }}' = refs/tags/v* ]]; then
+            tag='${{ github.ref }}'
+            tag="${tag:10}"
+            artifactID="${tag:1}"
+          else
+            tag=CI
+            artifactID='${{ github.sha }}'
+            artifactID="${artifactID:0:7}"
+          fi
+          echo "GITHUB_RELEASE_TAG=$tag" >> $GITHUB_ENV
+          echo "ARTIFACT_ID=$artifactID" >> $GITHUB_ENV
+
+      - name: Copy & rename artifacts
+        run: |
+          set -eux
+
+          mkdir artifacts
+
+          cp api/build/libs/pumpkin-api-kt-wasm-wasi-*.klib artifacts/pumpkin-api-kt-wasm-wasi-${ARTIFACT_ID}.klib
+          cp api/build/libs/pumpkin-api-kt-wasm-wasi-*-sources.jar artifacts/pumpkin-api-kt-wasm-wasi-${ARTIFACT_ID}-sources.jar
+          cp gradle-plugin/build/libs/pumpkin-api-kt-gradle-plugin-*.jar artifacts/pumpkin-api-kt-grade-plugin-${ARTIFACT_ID}.jar
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-dist
+          path: artifacts/*
+
+      - name: Upload artifacts to release
+        if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ env.GITHUB_RELEASE_TAG }}
+          artifacts: artifacts/*
+          allowUpdates: true
+          omitPrereleaseDuringUpdate: true
+          omitName: true
+          omitBody: true
+          omitDraftDuringUpdate: true
+          removeArtifacts: true
