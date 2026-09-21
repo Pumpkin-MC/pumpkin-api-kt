@@ -3,7 +3,16 @@ package plugin
 import pumpkin.Scheduler
 import pumpkin.Server
 
-/** Schedules Kotlin callbacks through Pumpkin's task scheduler. */
+/**
+ * Schedules Kotlin callbacks through Pumpkin's task scheduler.
+ *
+ * Callback handler IDs are allocated and managed automatically. Managed
+ * handlers use the reserved range `0x8000_0000u..UInt.MAX_VALUE` and are
+ * removed when their task completes, is cancelled, or the plugin unloads.
+ *
+ * Handler IDs allocated by this class are never reused, allowing callbacks
+ * arriving after cancellation or completion to be safely ignored.
+ */
 class PluginTasks internal constructor(
     private val handlers: HandlerRegistry<(Server.Server) -> Unit>,
 ){
@@ -11,8 +20,19 @@ class PluginTasks internal constructor(
     private var closed = false;
 
     /**
-     * Runs [action] once after [delayTicks] game ticks, passing the server to it.
-     * Returns a handle for cancelling the task before its action starts.
+     * Schedules [action] to run once after [delayTicks] game ticks.
+     *
+     * The current [Server.Server] is passed to [action] when the task runs.
+     *
+     * The returned [ScheduledTask] may be used to cancel the task before its action
+     * begins. Once the action has started, cancellation has no effect.
+     *
+     * The callback is automatically unregistered after execution or cancellation.
+     * Pending tasks are also cancelled automatically when the plugin unloads.
+     *
+     * @param delayTicks number of game ticks to wait before running [action]
+     * @param action action to execute once the delay has elapsed
+     * @return a handle that may be used to cancel the pending task
      */
     fun afterTicks(delayTicks: ULong, action: (Server.Server) -> Unit): ScheduledTask {
         check(!closed) { "!!! Cannot schedule tasks after plugin unload"}

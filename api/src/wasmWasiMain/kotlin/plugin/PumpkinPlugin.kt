@@ -17,7 +17,15 @@ abstract class PumpkinPlugin {
 
     internal val taskHandlers = HandlerRegistry<(Server.Server) -> Unit>()
 
-    /** Schedules tasks whose callback IDs are managed by this plugin. */
+    /**
+     * Scheduler for plugin-owned Kotlin callbacks.
+     *
+     * Tasks scheduled through this API are dispatched automatically and cleaned up
+     * when they complete, are cancelled, or the plugin is unloaded.
+     *
+     * This scheduler reserves handler IDs from `0x8000_0000u` onward. Manual task
+     * handlers must use IDs below that value.
+     */
     val tasks = PluginTasks(taskHandlers)
 
     /** Dispatches managed tasks, ignores retired IDs, and falls back to manual handlers. */
@@ -60,8 +68,17 @@ abstract class PumpkinPlugin {
     ): Event.Event = unsupportedCallback("handleEvent")
 
     /**
-     * Handles tasks registered directly through the bindings with manual IDs below 0x8000_0000u.
-     * Tasks registered through [tasks] are dispatched automatically.
+     * Handles tasks registered directly through Pumpkin's scheduler bindings.
+     *
+     * Handler IDs in the range `0x0000_0000u..<0x8000_0000u` are available for
+     * manually registered task callbacks.
+     *
+     * IDs from `0x8000_0000u` onward are reserved for callbacks managed by [tasks]
+     * and are dispatched automatically. Plugin implementations must not manually
+     * register task handlers using IDs in that reserved range.
+     *
+     * Prefer [tasks] when possible instead of registering scheduler callbacks
+     * manually.
      */
     open fun handleTask(handlerId: UInt, server: Server.Server) =
         unsupportedCallback<Unit>("handleTask")
