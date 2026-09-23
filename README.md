@@ -124,7 +124,7 @@ git submodule update --init --recursive
 ./gradlew :api:publishToMavenLocal :gradle-plugin:publishToMavenLocal
 ```
 
-To test these local packages in a consumer, add `mavenLocal()` before the other repositories in both `settings.gradle.kts`'s `pluginManagement.repositories` and `build.gradle.kts`'s `repositories`. Set both version placeholders to `0.1.0-dev`. After republishing changes under that version, run `./gradlew build --refresh-dependencies` in the consumer.
+To test these local packages in a consumer, add `mavenLocal()` before the other repositories in both `settings.gradle.kts`'s `pluginManagement.repositories` and `build.gradle.kts`'s `repositories`. Set both version placeholders to `0.1.1`. After republishing changes under that version, run `./gradlew build --refresh-dependencies` in the consumer.
 
 The [example](example/) is a standalone consumer with its own Gradle wrapper. After publishing locally, run `./example/gradlew -p example build --refresh-dependencies`, or open `example/` as a Gradle project in IntelliJ. The output is `example/build/pumpkin-example.wasm`.
 

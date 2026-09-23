@@ -35,7 +35,7 @@ private val toolVersions: Properties by lazy {
 abstract class PumpkinExtension @Inject constructor(objects: ObjectFactory) {
     val apiGroup: Property<String> = objects.property(String::class.java).convention("io.github.pumpkin-mc")
     val apiArtifact: Property<String> = objects.property(String::class.java).convention("pumpkin-api-kt")
-    val apiVersion: Property<String> = objects.property(String::class.java).convention("0.1.0-dev")
+    val apiVersion: Property<String> = objects.property(String::class.java).convention("0.1.1")
     val wasmToolsVersion: Property<String> = objects.property(String::class.java).convention(toolVersions.getProperty("wasmToolsVersion"))
     val binaryenVersion: Property<String> = objects.property(String::class.java).convention(toolVersions.getProperty("binaryenVersion"))
     val pluginClass: Property<String> = objects.property(String::class.java)
