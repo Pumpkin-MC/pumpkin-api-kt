@@ -6,7 +6,7 @@ plugins {
     `maven-publish`
 }
 
-group = "io.github.pumpkin-mc"
+group = "org.pumpkinmc"
 version = providers.gradleProperty("pumpkinApiVersion").getOrElse("0.1.1")
 
 base {
@@ -46,7 +46,7 @@ tasks.withType<JavaCompile>().configureEach {
 gradlePlugin {
     plugins {
         create("pumpkinPlugin") {
-            id = "io.github.pumpkin-mc.plugin"
+            id = "org.pumpkinmc.plugin"
             implementationClass = "io.github.pumpkinmc.gradle.PumpkinPlugin"
             displayName = "Pumpkin Kotlin plugin build"
             description = "Builds Kotlin/Wasm Pumpkin plugins from the published API source snapshot."
