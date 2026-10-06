@@ -33,7 +33,7 @@ private val toolVersions: Properties by lazy {
 }
 
 abstract class PumpkinExtension @Inject constructor(objects: ObjectFactory) {
-    val apiGroup: Property<String> = objects.property(String::class.java).convention("io.github.pumpkin-mc")
+    val apiGroup: Property<String> = objects.property(String::class.java).convention("org.pumpkinmc")
     val apiArtifact: Property<String> = objects.property(String::class.java).convention("pumpkin-api-kt")
     val apiVersion: Property<String> = objects.property(String::class.java).convention("0.1.1")
     val wasmToolsVersion: Property<String> = objects.property(String::class.java).convention(toolVersions.getProperty("wasmToolsVersion"))
@@ -63,7 +63,7 @@ class PumpkinPlugin : Plugin<Project> {
         apiSources: Configuration,
     ) {
         require(project.plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
-            "io.github.pumpkin-mc.plugin requires org.jetbrains.kotlin.multiplatform."
+            "org.pumpkinmc.plugin requires org.jetbrains.kotlin.multiplatform."
         }
 
         // Binaryen 130 fixes Linux release stack overflows on Kotlin-generated Wasm.

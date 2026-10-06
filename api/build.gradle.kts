@@ -9,7 +9,7 @@ plugins {
     `maven-publish`
 }
 
-group = "io.github.pumpkin-mc"
+group = "org.pumpkinmc"
 version = providers.gradleProperty("pumpkinApiVersion").getOrElse("0.1.1")
 
 base {

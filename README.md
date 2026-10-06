@@ -32,7 +32,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     kotlin("multiplatform") version "2.4.0"
-    id("io.github.pumpkin-mc.plugin") version "<plugin-version>"
+    id("org.pumpkinmc.plugin") version "<plugin-version>"
 }
 
 repositories {
