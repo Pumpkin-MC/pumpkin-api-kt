@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "org.pumpkinmc"
-version = providers.gradleProperty("pumpkinApiVersion").getOrElse("0.1.1")
+version = providers.gradleProperty("pumpkinApiVersion").getOrElse("0.1.2")
 
 base {
     archivesName.set("pumpkin-api-kt")
